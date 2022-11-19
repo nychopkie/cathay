@@ -7,22 +7,32 @@ from geopy.geocoders import Nominatim
 
 class Getting_Best_Location():
     # initial url
-    def __init__(self,origin_addresses,destination_addresses):
+    # setting the default destination address as mount fuji just to increase readibility of the get_lat_long() function,
+    # it has no effect on the function
+    def __init__(self,origin_addresses,destination_addresses="Mount Fuji"): 
         self.apikey="AIzaSyCJP88gPak3FtJq-ooijGdOEMa_MuknkLU"
         self.url1="https://maps.googleapis.com/maps/api/distancematrix/json?origins="
         
         # getting latitude of the origin location
         geolocator = Nominatim(user_agent="my_request")
-        location1 = geolocator.geocode(origin_addresses)
-        self.origin_addresses=str(location1.latitude)+"%2C"+str(location1.longitude)
+        self.location1 = geolocator.geocode(origin_addresses)
+        self.origin_addresses=str(self.location1.latitude)+"%2C"+str(self.location1.longitude)
         
         # getting latitude of the destination location
         self.url2="&destinations="
-        location2 = geolocator.geocode(destination_addresses)
-        self.destination_addresses=str(location2.latitude)+"%2C"+str(location2.longitude)
+        self.location2 = geolocator.geocode(destination_addresses)
+        self.destination_addresses=str(self.location2.latitude)+"%2C"+str(self.location2.longitude)
 
         self.url3="&mode=driving&key="
         self.fullurl=""
+    
+    # function for getting places latitude and longtitude, return by a list
+    def get_lat_long(self):
+        lat_long_list=[]
+        geolocator = Nominatim(user_agent="my_request")
+        lat_long_list.append(self.location1.latitude)
+        lat_long_list.append(self.location1.longitude)
+        return lat_long_list
         
     def valid_location(self):
         self.fullurl=self.url1+self.origin_addresses+self.url2+self.destination_addresses+self.url3+self.apikey
@@ -70,10 +80,11 @@ class destinations:
         self.destination_type = destination_type
         self.duration = category_duration[destination_type]
  
-#sample destinations
-#assumptions in our prototype:
-#only 3 types of travellers: Friends, Family, Couples, Individual
-#Only 4 natures of destination: Play, Shopping, Nature, Culture
+# sample destinations
+# assumptions in our prototype:
+# Only 3 types of travellers: Friends, Family, Couples, Individual
+# Only 4 natures of destination: Play, Shopping, Nature, Culture
+# These should be stored in a DBMS in future development
 disney = destinations(name="Tokyo Disneyland", out_or_in="out", popular_or_local="popular",people_going_with_type= ["Friends","Family","Couples"],
                         budget_used= 500, destination_type="Entertainment districts")
 
@@ -98,7 +109,7 @@ ginza = destinations(name="Ginza", out_or_in="in", popular_or_local="popular",pe
 akihabara = destinations(name="Akihabara", out_or_in="in", popular_or_local="popular",people_going_with_type= ["Friends", "Family", "Individual"],
                         budget_used= 400, destination_type="Shopping malls")
 
-Mannen_onsen = destinations(name="Mannen-yu onsen", out_or_in="in", popular_or_local="local",people_going_with_type= ["Couples"],
+Mannen_onsen = destinations(name="Mannenyu", out_or_in="in", popular_or_local="local",people_going_with_type= ["Couples"],
                         budget_used= 200, destination_type="Entertainment events")
 
 #class for travellers 
@@ -124,10 +135,36 @@ class travel_input:
         MAX_BUDGET_PER_DEST = 1000
         num_destinations = self.duration*MAX_DESTINATION_PER_DAY 
         destination_points = {}
-        HOTEL = "Tokyo Bay Shiomi Prince Hotel, 2 Chome-8-16 潮見江東區東京都日本" #hotel based on users choice
+
+        #based on our area searching algorithm 
+        #Find the centre of the location
+        centre_lat = 0
+        centre_long = 0
+        cannot_search = 0
+
+        #there may exists some destinations that cannot be searched on the google map, we exclude those destinations
+        for i in all_destinations:
+            try:
+                cur_lat_long = Getting_Best_Location(i.name).get_lat_long()
+                centre_lat += cur_lat_long[0]
+                centre_long += cur_lat_long[1]
+            except:
+                cannot_search += 1
+        
+        centre_lat /= (len(all_destinations)-cannot_search)
+        centre_long /= (len(all_destinations)-cannot_search)
+
+        #Since we do not have access to the key of the API, the algorithm cannot be run
+        # ---------------- Running algo --------------------"
+        # Return HOTEL
+
+        #In this sample case, we select a hotel manually to replace the return value of the algorithm
+        HOTEL = "Tokyo Bay Shiomi Prince Hotel, 2 Chome-8-16 潮見江東區東京都日本" 
 
         #We use the following algorithm to calculate the total score
-        #
+        #we rank the importance of the scoring factors as 
+        #traveller type > focus of the trip > indoor/outdoor = popular/local = cost effective
+        #hence we decided to allocate the weight as 0.4, 0.3, 0.1, 0.1, 0.1 respectively
         for i in range(len(all_destinations)):
             if (all_destinations[i].budget_used > changing_budget #over-budget then swap to another location 
                 and Getting_Best_Location(all_destinations[i].name, HOTEL).valid_location()): #make sure the time distance between the destination and hotel < 2 hours
@@ -136,9 +173,10 @@ class travel_input:
                 if (all_destinations[i].people_going_with_type == self.people_going_with): #types of travellers
                     people_going_with_score = 10 #for making the maximum total score be 10
                 else:
-                    people_going_with_score = 3 #because 0.4*3 - 1.2 > 1 (minimum sum of three other factors -> dominate other choices in the worst case)
+                    people_going_with_score = 3 
+                    #should not be too low because some places may attract their non-target group of travellers
 
-                #trip focus
+                #calculating trip_focus score
                 if (all_destinations[i].destination_type == "Museums"):
                     trip_focus_score = self.trip_focus["Culture"] 
                 elif (all_destinations[i].destination_type == "Entertainment districts" or all_destinations[i].destination_type == "Entertainment events"):
@@ -148,24 +186,28 @@ class travel_input:
                 elif (all_destinations[i].destination_type == "Scenic viewpoints"):
                     trip_focus_score = self.trip_focus["Nature"]
             
-                if (all_destinations[i].out_or_in == "in"): #indoor or outdoor
+                if (all_destinations[i].out_or_in == "in"): #indoor or outdoor score
                     out_or_in_score = self.indoor
                 elif (all_destinations[i].out_or_in == "out"):
                     out_or_in_score = 10 - self.indoor
 
-                if (all_destinations[i].popular_or_local == "popular"): #popular or local
+                if (all_destinations[i].popular_or_local == "popular"): #popular or local destinations score
                     popular_or_local_score = self.popular_locations
                 elif (all_destinations[i].out_or_in == "local"):
                     popular_or_local_score = 10 - self.popular_locations
                 
                 budget_score = 10* (1- all_destinations[i].budget_used/MAX_BUDGET_PER_DEST) #the lower the budget used the better
 
+                # our formula to calculate the total_score for a destination
+                # we multiply trip_focus_score by 2.5 because the range of trip_focus_score is [1,4], and we would like to scale it up to [2.5,10]
+                # the maximum value of total score is 10
+                # the minimum value of total score is 2.2
                 total_score =  0.4 * people_going_with_score + 0.3 * (2.5*trip_focus_score) + 0.1 * out_or_in_score + 0.1 * popular_or_local_score + 0.1* budget_score
-
+                
                 destination_points[all_destinations[i].name] = total_score
 
         confirmed_destination = []
-        #confirm where are we going
+        #confirm where are we going, sorted by total scores of destination in descending order
         for i in range(num_destinations):
             for key in destination_points.keys():
                 if destination_points[key] == max(destination_points.values()):
@@ -174,11 +216,10 @@ class travel_input:
                     break
         
 
-
+        #create the dictionary story the destination we are going to each day, collected from the confirmed_destination list
         itinerary_destinations = {}
         copy_of_confirmed_destination = confirmed_destination
         varying_len_confirmed_destination = len(copy_of_confirmed_destination)
-        print(copy_of_confirmed_destination)
 
         for i in range(1,self.duration+1):
             this_day_duration = 0
@@ -189,7 +230,8 @@ class travel_input:
                 # assign attractions for every day
                 if (varying_len_confirmed_destination == 0):
                     break
-
+                
+                # we always append the first value of the list first because the score is the highest
                 for k in range(len(all_destinations)):
                         assigned_location = copy_of_confirmed_destination[0]
                         if (all_destinations[k].name == assigned_location):
@@ -201,16 +243,14 @@ class travel_input:
                                 destination_count += 1
                                 break
              
-             
-        return itinerary_destinations #return itinerary planned
-
+        return itinerary_destinations
 
 
 
 #run with sample input
 sample = travel_input(know_destination=True, destination="Tokyo", duration=3,budget_per_day=2000, 
-                    people_going_with="Family", indoor=6, popular_locations= 8,trip_focus= {"Shopping":4,"Entertainment":3,"Nature":2,"Culture":1})
-            
+        people_going_with="Family", indoor=6, popular_locations= 8,trip_focus= {"Shopping":4,"Entertainment":3,"Nature":2,"Culture":1})
+
 itinerary = sample.generate_itinerary()
 print(itinerary)
 
