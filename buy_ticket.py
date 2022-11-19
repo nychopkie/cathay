@@ -5,16 +5,19 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.chrome.options import Options
 
+chrome_opt = Options()      # keep it open
+chrome_opt.add_experimental_option('detach', True)
 # from get_flight_data import FlightSearch
 
-go_port = 'HKG'
+go_port = 'HKG'     # assumed we can get this result from previous operation
 dest_port = 'NRT'
 # flight_info = FlightSearch(current_port=go_port, dest_port=dest_port)
 now = datetime.datetime.now()
 
-go_date = now + datetime.timedelta(days=3)
-back_date = go_date + datetime.timedelta(days=3)
+go_date = now + datetime.timedelta(days=3) #departure date
+back_date = go_date + datetime.timedelta(days=3) #return date
 
 month_dict = {1: "January", 2: "February", 3: "March", 4: "April", 5: "May", 6: "June",
               7: "July", 8: "August", 9: "September", 10: "October", 11: "November", 12: "December"}
@@ -26,7 +29,7 @@ class buy_ticket:
         self.go_buy()
 
     def go_buy(self):
-        driver = webdriver.Chrome(service=path)
+        driver = webdriver.Chrome(service=path, chrome_options=chrome_opt)
 
         driver.get('https://www.cathaypacific.com/cx/en_HK/book-a-trip.html')
 
