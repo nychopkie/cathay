@@ -64,7 +64,7 @@ class Getting_Best_Location():
                         return False
 
 
-#https://en.wikipedia.org/wiki/Category:Tourist_attractions
+# https://en.wikipedia.org/wiki/Category:Tourist_attractions
 # We determine the duration of staying in each destination by its category (destination_type), 
 # we reference these data from wikipedia, but we only use the relavent ones in our prototype
 category_duration = {"Museums":2, "Entertainment districts":6, "Entertainment events":2, "Shopping malls":3, "Scenic viewpoints":2}
