@@ -4,6 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
 
 from get_flight_data import FlightSearch
 
@@ -11,7 +12,7 @@ flight_info = FlightSearch()
 month_dict = {1: "January", 2: "February", 3: "March", 4: "April", 5: "May", 6: "June",
               7: "July", 8: "August", 9: "September", 10: "October", 11: "November", 12: "December"}
 
-path =Service('chromedriver.exe')
+path = Service('chromedriver.exe')
 
 class buy_ticket:
     def __init__(self):
@@ -43,7 +44,11 @@ class buy_ticket:
         departure_day = flight_info.date.day
         for ele in calendar_dep_day:
             if ele.text == departure_day:
-                ele.click()
+                try:
+                    ele.click()
+                except NoSuchElementException:
+                    continue
+
 
 
         re_day = driver.find_element(By.XPATH, '//*[@id="dppdvs3"]/span[2]/span[3]')  # return date choice
@@ -54,7 +59,10 @@ class buy_ticket:
         return_day = (flight_info.date + play_duration).day
         for ele in calendar_re_day:
             if ele.text == return_day:
-                ele.click()
+                try:
+                    ele.click()
+                except NoSuchElementException:
+                    continue
 
         submit_btm = driver.find_element(By.XPATH, '//*[@id="book-trip-flight"]/div[1]/form/button')
         submit_btm.click()
