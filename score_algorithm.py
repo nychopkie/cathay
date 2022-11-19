@@ -178,7 +178,6 @@ class travel_input:
         itinerary_destinations = {}
         copy_of_confirmed_destination = confirmed_destination
         varying_len_confirmed_destination = len(copy_of_confirmed_destination)
-        print(copy_of_confirmed_destination)
 
         for i in range(1,self.duration+1):
             this_day_duration = 0
