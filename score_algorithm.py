@@ -201,6 +201,7 @@ class travel_input:
                                 destination_count += 1
                                 break
              
+             
         return itinerary_destinations #return itinerary planned
 
 
