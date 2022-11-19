@@ -3,7 +3,7 @@ import datetime
 
 current_port = 'HKG'
 dest_port = 'BKK'
-utc_time = datetime.datetime.utcnow()
+utc_time = datetime.datetime.now(datetime.timezone.utc)
 
 url_head = 'https://cathayhackathon'
 url = f'{url_head}/operation/flightInformation/v3/next24hraircraftstatus'
@@ -26,10 +26,13 @@ class FlightSearch:
         self.flight = {}
         self.dept_time = {}
         self.arri_time = {}
+        self.start = current_port
+        self.dest = dest_port
+        self.date = utc_time.date()
         self.get_flight()
 
     def get_flight(self):
-        response = requests.get(url=url)
+        response = requests.get(url=url, headers=header, params=para)
         response = response.json()
         i = 0
         for ele in response['flights']:
