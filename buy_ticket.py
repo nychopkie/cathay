@@ -6,9 +6,16 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 
-from get_flight_data import FlightSearch
+# from get_flight_data import FlightSearch
 
-flight_info = FlightSearch()
+go_port = 'HKG'
+dest_port = 'NRT'
+# flight_info = FlightSearch(current_port=go_port, dest_port=dest_port)
+now = datetime.datetime.now()
+
+go_date = now + datetime.timedelta(days=3)
+back_date = go_date + datetime.timedelta(days=3)
+
 month_dict = {1: "January", 2: "February", 3: "March", 4: "April", 5: "May", 6: "June",
               7: "July", 8: "August", 9: "September", 10: "October", 11: "November", 12: "December"}
 
@@ -18,17 +25,17 @@ class buy_ticket:
     def __init__(self):
         pass
 
-    def buy(self):
+    def go_buy(self):
         driver = webdriver.Chrome(service=path)
 
         driver.get('https://www.cathaypacific.com/cx/en_HK/book-a-trip.html')
 
         start_port = driver.find_element(By.XPATH, '//*[@id="depart-label"]')  # departure airport choice
-        start_port.send_keys(flight_info.start)
+        start_port.send_keys(go_port)
         start_port.send_keys(Keys.ENTER)
 
         end_port = driver.find_element(By.XPATH, '//*[@id="destination-label"]')  # destination airport choice
-        end_port.send_keys(flight_info.dest)
+        end_port.send_keys(dest_port)
         end_port.send_keys(Keys.ENTER)
 
         dep_date = driver.find_element(By.XPATH, '//*[@id="dpuxzabv"]/span[2]/span[3]')  #departure date choice
@@ -41,7 +48,7 @@ class buy_ticket:
         # if first_month.text == month_dict[ flight_info.date.month]:  # departure date in first month choice
 
         calendar_dep_day = driver.find_elements(By.CLASS_NAME, 'ui-state-default')[::-1] # inverse to make sure it's valid even when it go to second month
-        departure_day = flight_info.date.day
+        departure_day = go_date.day
         for ele in calendar_dep_day:
             if ele.text == departure_day:
                 try:
@@ -56,7 +63,7 @@ class buy_ticket:
 
         calendar_re_day = driver.find_elements(By.CLASS_NAME, 'ui-state-default')[::-1] # inverse to make sure it's valid even when it go to second month
         play_duration = datetime.timedelta(days=3)
-        return_day = (flight_info.date + play_duration).day
+        return_day = back_date.day
         for ele in calendar_re_day:
             if ele.text == return_day:
                 try:
