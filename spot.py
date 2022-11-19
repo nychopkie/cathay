@@ -1,6 +1,8 @@
 import requests
 
 class Spot:
+    '''this object returns the dictionary with format {place:[lat,lng]} which place stands for tourist spot name and
+    lat and lng stands for its actual position in map'''
     def __init__(self):
         self.spot_dict = {}
         self.city = 'Tokyo'
