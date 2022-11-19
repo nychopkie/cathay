@@ -34,7 +34,7 @@
 .slider::-moz-range-thumb {
   width: 25px; /* Set a specific slider handle width */
   height: 25px; /* Slider handle height */
-  background: #04AA6D; /* Green background */
+  background: #00645A; /* Green background */
   cursor: pointer; /* Cursor on hover */
 }
 
