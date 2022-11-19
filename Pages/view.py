@@ -37,4 +37,4 @@ def preference():
 
 @app.route("/result")
 def itinerary():
-    return render_template("preference.html")
+    return render_template("itinerary.html")
