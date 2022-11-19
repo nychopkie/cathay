@@ -34,3 +34,7 @@ def accompany():
 @app.route("/Q5")
 def preference():
     return render_template("preference.html")
+
+@app.route("/result")
+def itinerary():
+    return render_template("preference.html")
