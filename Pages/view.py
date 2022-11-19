@@ -31,4 +31,6 @@ def budget():
 def accompany():
     return render_template("Accompany.html")
 
-
+@app.route("/Q5")
+def preference():
+    return render_template("preference.html")
