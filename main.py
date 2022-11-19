@@ -1,6 +1,6 @@
-# we all need somewhere to start i guess
-print("i want to cry.")
-for i in range(5):
-    print("ah.")
-    print(1)
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+from velzon import create_app
+
+app = create_app()
+
+if __name__ == '__main__':
+    app.run(debug=True)
