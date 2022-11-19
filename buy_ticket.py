@@ -23,7 +23,7 @@ path = Service('chromedriver.exe')
 
 class buy_ticket:
     def __init__(self):
-        pass
+        self.go_buy()
 
     def go_buy(self):
         driver = webdriver.Chrome(service=path)
