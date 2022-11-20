@@ -38,7 +38,8 @@ def preference():
 @app.route("/result")
 def itinerary():
     return render_template("itinerary.html")
+# the forms would get the data from the questionnair and then generate this itenerary
 
-@app.route("/restaraunt")
+@app.route("/restaurant")
 def restaraunt():
     return render_template("restaraunt.html")
