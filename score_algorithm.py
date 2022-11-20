@@ -6,7 +6,7 @@ import geopy
 from geopy.geocoders import Nominatim
 
 #our own modules
-from Getting_best_location import *
+from getting_best_location import *
 from getting_restaurant import *
 
 

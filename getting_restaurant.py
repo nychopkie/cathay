@@ -15,6 +15,7 @@ class get_restaurant():
         #generate the url
         self.url=self.url1+self.lat+self.url2+self.long+self.url3+self.api
 
+    #function to find the restaurant generated from a coordinates 
     def find_restaurant(self):
         result_list=[]
         response = requests.get(self.url)
